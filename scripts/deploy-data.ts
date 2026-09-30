@@ -40,14 +40,16 @@ function required(name: string) {
 
 async function main() {
   const replace = process.argv.includes("--replace");
-  const localUrl = process.env.DATABASE_URL ?? "file:./data/belovedtan.db";
+  // The local source is always the file on disk (DATABASE_URL may still be set to the hosted database in
+  // this terminal from an earlier step). LOCAL_DATABASE_URL overrides it if your local copy lives elsewhere.
+  const localUrl = process.env.LOCAL_DATABASE_URL ?? "file:./data/belovedtan.db";
   const targetUrl = required("TARGET_DATABASE_URL");
   const targetToken = required("TARGET_DATABASE_AUTH_TOKEN");
   if (path.resolve(targetUrl.replace(/^file:/, "")) === path.resolve(localUrl.replace(/^file:/, ""))) {
     throw new Error("TARGET_DATABASE_URL must be your hosted (libsql://…) database, not the local one.");
   }
 
-  const local = createClient({ url: localUrl, authToken: process.env.DATABASE_AUTH_TOKEN || undefined });
+  const local = createClient({ url: localUrl, authToken: process.env.LOCAL_DATABASE_AUTH_TOKEN || undefined });
   const target = createClient({ url: targetUrl, authToken: targetToken });
 
   // 1. Create/update the tables on the target from src/db/schema.ts.
