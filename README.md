@@ -228,14 +228,63 @@ scripts/                    seed, example pages, one-off migrations
 | `npm run db:studio` | Browse the database in Drizzle Studio |
 | `npm run db:generate` / `db:migrate` | Versioned migrations, if you prefer them to `push` |
 
-## Deploying
+## Deploying to Vercel (with all your local content)
 
-The local SQLite file (`data/belovedtan.db`) and `data/uploads/` work on a single server or VPS with a persistent disk:
-copy the project, create `.env`, then run `npm install`, `npm run setup`, `npm run build` and `npm start`
-(behind a process manager such as PM2 and a reverse proxy such as Nginx or Caddy for HTTPS).
+On Vercel the database lives on **Turso** (hosted SQLite) and uploaded images/videos on **Vercel Blob**.
+The code switches automatically: with `BLOB_READ_WRITE_TOKEN` set, editor uploads go to Blob; without it they are
+saved to `data/uploads` as before.
 
-On serverless hosts such as Vercel the filesystem isn't persistent. Use a hosted libSQL database
-(e.g. [Turso](https://turso.tech)) by setting `DATABASE_URL=libsql://…` and `DATABASE_AUTH_TOKEN`, run
-`npm run setup` once against it, and move uploads to object storage (S3, R2, Cloudinary).
+### 1. Create the Turso database
+
+1. Sign up at https://turso.tech and click **Create Database** (e.g. `belovedtan`). Note the region.
+2. Copy the database **URL** (`libsql://…turso.io`) and create a **token** with read & write access.
+
+### 2. Create the Vercel project and Blob store
+
+1. Sign up at https://vercel.com with GitHub, then **Add New… → Project** and import this repository.
+2. Add these **Environment Variables** before the first deploy:
+
+   | Name | Value |
+   | --- | --- |
+   | `DATABASE_URL` | your Turso URL |
+   | `DATABASE_AUTH_TOKEN` | your Turso token |
+   | `SESSION_SECRET` | a new long random string |
+
+3. Click **Deploy**.
+4. In the project, open **Storage → Create → Blob**, create a store and **connect it to this project**. Vercel adds
+   `BLOB_READ_WRITE_TOKEN` to the project automatically. Copy the token too (Storage → your store → **.env.local**
+   tab); you need it once in the next step.
+5. **Redeploy** (Deployments → ⋯ → Redeploy) so the site picks up the Blob token.
+
+### 3. Copy your local content online
+
+From your computer, in the project folder (PowerShell):
+
+```powershell
+$env:TARGET_DATABASE_URL = "libsql://your-db.turso.io"
+$env:TARGET_DATABASE_AUTH_TOKEN = "your-turso-token"
+$env:BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_…"
+npm run deploy:data
+```
+
+This creates the tables on Turso, uploads everything in `data/uploads/` to Vercel Blob, and copies every user, page,
+header/footer and global widget, with image links pointing at the uploaded copies. Your local database and files are
+only read, never changed. It refuses to overwrite a database that already has content; run
+`npm run deploy:data -- --replace` to replace the online content with your local content again.
+
+Then open `https://your-project.vercel.app/admin` and sign in with your **local** admin email and password.
+
+### Updating
+
+- **Code:** `git push` to `main`; Vercel redeploys automatically.
+- **Content:** edit it directly in the online admin panel. (Running `deploy:data -- --replace` again overwrites
+  online edits with your local data.)
+- **Schema changes:** if `src/db/schema.ts` changes, re-run `npm run deploy:data -- --replace`, or run
+  `npm run db:push` with `DATABASE_URL` / `DATABASE_AUTH_TOKEN` set to the Turso values.
+
+### Other hosts
+
+On a VPS with a persistent disk no extra services are needed: copy the project and the `data/` folder, create
+`.env`, then `npm install`, `npm run build` and `npm start` (behind PM2 and Nginx/Caddy for HTTPS).
 
 Always use a unique `SESSION_SECRET` in production.

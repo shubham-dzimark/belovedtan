@@ -5,6 +5,43 @@ import { useId, useState } from "react";
 
 const isVideo = (url: string) => /\.(mp4|webm)(\?|$)/i.test(url);
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "video/mp4", "video/webm"];
+const MAX_BYTES = 50 * 1024 * 1024;
+
+// Asked once per editor session: "blob" when hosted with Vercel Blob, "local" otherwise.
+let uploadModePromise: Promise<"blob" | "local"> | null = null;
+function getUploadMode() {
+  uploadModePromise ??= fetch("/api/uploads")
+    .then((res) => res.json() as Promise<{ mode?: "blob" | "local" }>)
+    .then((json) => json.mode ?? "local")
+    .catch(() => "local" as const);
+  return uploadModePromise;
+}
+
+async function uploadFile(file: File): Promise<string> {
+  if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Use a JPG, PNG, WebP, GIF, AVIF, MP4 or WebM file.");
+  if (file.size > MAX_BYTES) throw new Error("Files must be 50 MB or smaller.");
+
+  if ((await getUploadMode()) === "blob") {
+    // Straight from the browser to Vercel Blob, using a token from /api/uploads/blob.
+    const { upload } = await import("@vercel/blob/client");
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "") || "upload";
+    const blob = await upload(`uploads/${safeName}`, file, {
+      access: "public",
+      handleUploadUrl: "/api/uploads/blob",
+      contentType: file.type,
+    });
+    return blob.url;
+  }
+
+  const body = new FormData();
+  body.append("file", file);
+  const res = await fetch("/api/uploads", { method: "POST", body });
+  const json = (await res.json()) as { url?: string; error?: string };
+  if (!res.ok || !json.url) throw new Error(json.error ?? "Upload failed.");
+  return json.url;
+}
+
 /** Puck field: paste a URL or upload an image/video from your computer. */
 export function MediaInput({
   label,
@@ -27,12 +64,7 @@ export function MediaInput({
     setBusy(true);
     setError("");
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/uploads", { method: "POST", body });
-      const json = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !json.url) throw new Error(json.error ?? "Upload failed.");
-      onChange(json.url);
+      onChange(await uploadFile(file));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {

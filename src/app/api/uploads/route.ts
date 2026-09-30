@@ -3,13 +3,25 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { decrypt, SESSION_COOKIE } from "@/lib/session";
-import { MAX_UPLOAD_BYTES, UPLOAD_TYPES } from "@/lib/uploads";
+import { MAX_UPLOAD_BYTES, UPLOAD_TYPES, uploadMode } from "@/lib/uploads";
 
-// Uploads an image or video from the page editor. Admins only.
+// Tells the editor where to upload: straight to Vercel Blob, or to this server's disk. Admins only.
+export async function GET(req: NextRequest) {
+  const session = await decrypt(req.cookies.get(SESSION_COOKIE)?.value);
+  if (!session?.userId) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+  return NextResponse.json({ mode: uploadMode() });
+}
+
+// Uploads an image or video from the page editor to data/uploads (local mode). Admins only.
 export async function POST(req: NextRequest) {
   const session = await decrypt(req.cookies.get(SESSION_COOKIE)?.value);
   if (!session?.userId) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+  if (uploadMode() === "blob") {
+    return NextResponse.json({ error: "Uploads go to Blob storage on this server." }, { status: 400 });
   }
 
   const form = await req.formData().catch(() => null);

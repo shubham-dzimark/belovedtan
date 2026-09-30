@@ -13,7 +13,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts",
     "setup": "npm run db:push && npm run db:seed",
-    "db:landing": "tsx --import ./scripts/loaders/ignore-css.mjs scripts/create-landing.ts"
+    "db:landing": "tsx --import ./scripts/loaders/ignore-css.mjs scripts/create-landing.ts",
+    "deploy:data": "tsx scripts/deploy-data.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
@@ -23,6 +24,7 @@
     "@mantine/notifications": "^9.6.3",
     "@puckeditor/core": "^0.23.0",
     "@tabler/icons-react": "^3.48.0",
+    "@vercel/blob": "^2.8.0",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.3",
     "jose": "^6.2.12",

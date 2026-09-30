@@ -17,3 +17,11 @@ export const EXT_TYPES = Object.fromEntries(
 );
 
 export const UPLOAD_NAME = /^[a-f0-9]{32}\.(jpg|png|webp|gif|avif|mp4|webm)$/;
+
+/**
+ * Where editor uploads go. With BLOB_READ_WRITE_TOKEN set (Vercel Blob, used when hosted on Vercel)
+ * the browser uploads straight to Blob storage; otherwise files are saved to data/uploads on disk.
+ */
+export function uploadMode(): "blob" | "local" {
+  return process.env.BLOB_READ_WRITE_TOKEN ? "blob" : "local";
+}
