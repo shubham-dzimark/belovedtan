@@ -1,0 +1,147 @@
+/*
+ * Styles for the admin screens that sit outside Mantine: the full-screen Puck editor's
+ * header buttons and the preview bar. Everything else in the admin uses Mantine components.
+ */
+
+:root {
+  --adm-border: #e4e6eb;
+  --adm-text: #111827;
+  --adm-muted: #6b7280;
+  --adm-accent: #6d28d9;
+  --adm-accent-hover: #5b21b6;
+}
+
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--adm-text) !important;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.adm-btn:hover {
+  background: #f3f4f6;
+}
+
+.adm-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.adm-btn--sm {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+.adm-editor-status {
+  align-self: center;
+  color: var(--adm-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.adm-preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fef3c7;
+  color: #78350f;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Match the public site so the preview looks like the real page. */
+.adm-preview-page {
+  min-height: calc(100vh - 52px);
+  background: #ffffff;
+  color: #111111;
+  font-size: 16px;
+}
+
+.adm-btn--primary {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent);
+  color: #ffffff !important;
+}
+
+.adm-btn--primary:hover {
+  background: var(--adm-accent-hover);
+}
+
+/* ---------- "Save as global widget" dialog (inside the Puck editor) ---------- */
+
+.adm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(17, 24, 39, 0.45);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.adm-dialog {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--adm-text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.adm-dialog h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.adm-dialog p {
+  margin: 0 0 6px;
+  color: var(--adm-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.adm-dialog label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.adm-dialog input {
+  padding: 10px 12px;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 15px;
+}
+
+.adm-dialog input:focus {
+  outline: 2px solid #ede9fe;
+  border-color: var(--adm-accent);
+}
+
+.adm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}

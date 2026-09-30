@@ -1,24 +1,45 @@
 {
-  "name": "belovedtan-next",
+  "name": "belovedtan",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx scripts/seed.ts",
+    "setup": "npm run db:push && npm run db:seed",
+    "db:landing": "tsx --import ./scripts/loaders/ignore-css.mjs scripts/create-landing.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@mantine/core": "^9.6.3",
+    "@mantine/hooks": "^9.6.3",
+    "@mantine/modals": "^9.6.3",
+    "@mantine/notifications": "^9.6.3",
+    "@puckeditor/core": "^0.23.0",
+    "@tabler/icons-react": "^3.48.0",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.3",
+    "jose": "^6.2.12",
     "next": "16.3.7",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
